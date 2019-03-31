@@ -8,52 +8,85 @@
 
 //---------------------------------------------------------------------------
 
-EarthSolarRotation::EarthSolarRotation() : TModel()
+long double ArtificialSatellite::atmosParam[8][4] =
 {
-    X0.resize(6);
-    X0[0] = -2.566123740124270e+7L; //km
-    X0[1] = 1.339350231544666e+8L;
-    X0[2] = 5.805149372446711e+7L;
-    X0[3] = -2.983549561177192e+1L; //km/c
-    X0[4] = -4.846747552523134L;
-    X0[5] = -2.100585886567924L;
-}
-
-EarthSolarRotation::EarthSolarRotation( double t0, double tk, TVector& V ) : EarthSolarRotation()
-{
-    this->t0 = t0;
-    this->t1 = tk;
-    this->X0 = TVector(V);
-}
-
-EarthSolarRotation::EarthSolarRotation( Date d0, Date dk, Date d, TVector& V ) :
-    EarthSolarRotation(toJulianDate(d0), toJulianDate(dk), V)
-{
-    this->t0 = toJulianDate(d0)*86400;
-    this->t1 = toJulianDate(dk)*86400;
-    start = d0; finish = dk;
-    checkDay = d;
+    { 0.0L,       1.225L,     -0.2639E-8L, 0.7825E-4L  },
+    { 20000.0L,   0.891E-1L,  0.4407E-9L,  0.16375E-3L },
+    { 60000.0L,   2.578E-4L,  -0.2560E-8L, 0.5905E-4L  },
+    { 100000.0L,  4.061E-7L,  0.1469E-8L,  0.1787E-3L  },
+    { 150000.0L,  2.130E-9L,  0.8004E-10L, 0.3734E-4L  },
+    { 300000.0L,  4.764E-11L, 0.7111E-11L, 0.9280E-5L  },
+    { 600000.0L,  8.762E-13L, 0.1831E-11L, 0.9280E-5L  },
+    { 900000.0L,  6.367E-14L, 0.0L,        0.9540E-5L  }
 };
 
-double EarthSolarRotation::toJulianDate(Date date)
+ArtificialSatellite::ArtificialSatellite() : TModel ()
 {
-    int a = (14 - date.month)/12,
-        M = date.month+12*a - 3,
-        Y = date.year+4800 - a,
-        JDN = date.day + ((153*M+2)/5) + 365*Y
-            +(Y/4) - (Y/100) - (Y/400)-32045;
-    return JDN + (date.hour - 12)/24. + (date.minute)/1440. + date.seconds/86400.;
+    //NormalGaussGenerator generator;
+    //generator.setOmega(50);
+    A.resize(3, 3); startRotation.resize(3, 3);
+    A(0, 0) = cos(u)*cos(pi/2)-sin(u)*sin(pi/2.0L)*cos(i); A(0, 1) = -sin(u)*cos(pi/2.0L)-cos(u)*sin(pi/2.0L)*cos(i); A(0, 2) = sin(i)*sin(pi/2.0L);
+    A(1, 0) = cos(u)*sin(pi/2)+sin(u)*cos(pi/2.0L)*cos(i); A(1, 1) = -sin(u)*sin(pi/2.0L)+cos(u)*cos(pi/2.0L)*cos(i); A(1, 2) = sin(i)*cos(pi/2.0L);
+    A(2, 0) = sin(u)*sin(i);                               A(2, 1) = cos(u)*sin(i);                                   A(2, 2) = cos(i);
+
+    startRotation(0, 0) = cos(i);  startRotation(0, 1) = 0; startRotation(0, 2) = sin(i);
+    startRotation(1, 0) = 0;       startRotation(1, 1) = 1; startRotation(1, 2) = 0;
+    startRotation(2, 0) = -sin(i); startRotation(2, 1) = 0; startRotation(2, 2) = cos(i);
+
+    X0.resize(8); temp.resize(3); Ve.resize(3); EarthRotation.resize(3);
+    temp[0] = Re+Hp; temp[1] = 0; temp[2] = 0; temp = startRotation*temp;
+
+    Ve[0] = sqrt(mu/p)*e*sin(0.0L); Ve[1] = sqrt(mu/p)*(1+e*cos(pi/2)); Ve[2] = 0; Ve = A*Ve;
+
+    EarthRotation[0] = 0; EarthRotation[1] = 0; EarthRotation[2] = omega;
+
+    X0[0] = temp[0];
+    X0[1] = temp[1];
+    X0[2] = temp[2];
+    X0[3] = Ve[0];
+    X0[4] = Ve[1];
+    X0[5] = Ve[2];
+    X0[6] = 0;
+    X0[7] = 0;
+
+    t0 = 0; t1 = 86400.L*1L; //SamplingIncrement = 1;
 }
 
-void EarthSolarRotation::getRight( const TVector& X, long double t, TVector& Y )
+long double ArtificialSatellite::ro(long double distance, long double rand)
 {
-    Y.resize(6);
-    Y[0] = X[3];
-    Y[1] = X[4];
-    Y[2] = X[5];
-    ro = sqrt(X[0]*X[0] + X[1]*X[1] + X[2]*X[2]);
-    Y[3] = -mu*X[0]/pow(ro, 3.);
-    Y[4] = -mu*X[1]/pow(ro, 3.);
-    Y[5] = -mu*X[2]/pow(ro, 3.);
-    if (toJulianDate(checkDay)*86400 >= t) std::cout << "time to test" << std::endl;
+    int i = 0;
+    for (i = 8-1; i >= 0; i--) if (distance >= atmosParam[i][0]) break;
+    long double thickness = atmosParam[i][1]*(1 + rand)*exp(atmosParam[i][2]*pow((distance - atmosParam[i][0]), 2)
+                                                          - atmosParam[i][3]*pow((distance - atmosParam[i][0]), 1));
+    return thickness;//*pow(1000.0L, 3);
+
+}
+
+void ArtificialSatellite::getRight( TVector &X, long double t, TVector &Y )
+{
+    //if (t > time) { time += generator.getSamplingTime(); rand = generator.generate(); }
+    Y.resize(8);
+    dist = sqrt(X[0]*X[0]+X[1]*X[1]+X[2]*X[2]); h = dist - Re; //std::cout << "H = " << h << "; dist = " << dist << std::endl;
+    //std::cout << "H = " << h << "; dist = " << dist << "; Re = " << Re << std::endl;
+    if ( h < 2 ) { dropped = true; for (int i = 0; i < 100; i++) std::cout << "dropped" << std::endl; }
+    if ( dropped == false )
+    {
+        temp.resize(3); V.resize(3); for(int i = 0; i < 3; i++) { temp[i] = X[i]; V[i] = X[i+3]; }
+        Va.resize(3); Va = (V - EarthRotation^temp); //std::cout << "PreVA = " << Va[0] << " " << Va[1] << " " << Va[2] << std::endl;
+        //Va = (Va*(1000.0L*(-1.0L/m*CxS*ro(h*1000.0L, 0.0L)*Va.length()*1000.0L/2.0L)))*(1.0L/1000.0L); //std::cout << "VA = " << Va[0] << " " << Va[1] << " " << Va[2] << std::endl;
+        Y[0] = X[3];
+        Y[1] = X[4];
+        Y[2] = X[5];
+        //км/с^2 = км^3/c^2*км/км^3  - кг^(-1)*(км^2)*(кг/км^3)*км/с*км/с
+                                       //кг^(-1)*(м^2)*(кг/м^3)*(м/с)*(м/с)
+        Y[3] = -mu*X[0]/pow(dist, 3) - (1.0L/m)*CxS*(ro(h*1000.0L, 0.0L)*Va.length()/2.0L)*Va[0]*1000.0L;//1000.0L;//+ Va[0];
+        Y[4] = -mu*X[1]/pow(dist, 3) - (1.0L/m)*CxS*(ro(h*1000.0L, 0.0L)*Va.length()/2.0L)*Va[1]*1000.0L;//1000.0L; //+ Va[1];
+        Y[5] = -mu*X[2]/pow(dist, 3) - (1.0L/m)*CxS*(ro(h*1000.0L, 0.0L)*Va.length()/2.0L)*Va[2]*1000.0L;//1000.0L; //+ Va[2];
+        Y[6] = 0; //X[7];
+        Y[7] = 0; //1/pow(T, 2) - 2*ksi/T*X[7] - 1/pow(T, 2)*X[6];
+    } else {
+        std::cout << "AES dropped" << std::endl;
+        for (int i = 0; i < X.size(); i++) Y[i] = 0;
+        for (int i = 3; i < 6; i++) X[i] = 0;
+    }
 }

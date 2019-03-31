@@ -114,7 +114,7 @@ long double TDormandPrinceIntegrator::Run(TModel* Model)
 
         // Коррекция шага
         h_new = h / max( 0.1, min( 5., pow(e / Eps, 0.2)/0.9 ) );
-
+        //std::cout << "H = " << h_new << "; eps = " << e << "; time = " << t << std::endl;
 	   // Если локальная ошибка превышает установленную величину, пытаемся сделать шаг заново
         if ( e > Eps )
             continue;

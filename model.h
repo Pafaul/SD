@@ -18,7 +18,7 @@ class TModel
     public:
         TModel() : SamplingIncrement( 60 ), t0( 0. ), t1( 15811200. ), N( 0. ) {}
 
-		virtual void getRight( const TVector& X, long double t, TVector& Y ) = 0;
+        virtual void getRight( TVector& X, long double t, TVector& Y ) = 0;
 		
         inline TVector getInitialConditions() const { return X0; }
         inline int getOrder() const { return X0.size(); }

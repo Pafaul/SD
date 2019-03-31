@@ -17,11 +17,11 @@
 #include "custom.h"
 
 
-void calcModel(TModel* model);
+void writeRes(TModel* model);
 
 int main()
 {
-    TVector X0(6);
+    /*TVector X0(6);
     X0.resize(6);
     X0[0] = -2.566123740124270e+7L; //km
     X0[1] = 1.339350231544666e+8L;
@@ -29,22 +29,22 @@ int main()
     X0[3] = -2.983549561177192e+1L; //km/c
     X0[4] = -4.846747552523134L;
     X0[5] = -2.100585886567924L;
-    Date start, finish, checkDay;
-    start.year=2019; start.month=1; start.day=1;
-    finish.year=2020; finish.month=3; finish.day=17;
-    checkDay.year=2019; checkDay.month=3; checkDay.day=16;
-    TModel* model = new EarthSolarRotation(start, finish, checkDay, X0);
+    //Date start, finish, checkDay;
+    //start.year=2019; start.month=1; start.day=1;
+    //finish.year=2020; finish.month=3; finish.day=17;
+    //checkDay.year=2019; checkDay.month=3; checkDay.day=16;*/
+    TModel* model = new ArtificialSatellite();
     TIntegrator* Integrator = new TDormandPrinceIntegrator();
     Integrator->setPrecision(1E-16);
     Integrator->Run( model );
-    calcModel(model);
+    writeRes(model);
     delete model;
     delete Integrator;
 	return 0;
 }
 
 
-void calcModel(TModel* model){
+void writeRes(TModel* model){
 
     std::ofstream file("test.txt");
 
