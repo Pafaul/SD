@@ -35,7 +35,7 @@ int main()
     //checkDay.year=2019; checkDay.month=3; checkDay.day=16;*/
     TModel* model = new ArtificialSatellite();
     TIntegrator* Integrator = new TDormandPrinceIntegrator();
-    Integrator->setPrecision(1E-16);
+    Integrator->setPrecision(1E-10);
     Integrator->Run( model );
     writeRes(model);
     delete model;
@@ -48,12 +48,12 @@ void writeRes(TModel* model){
 
     std::ofstream file("test.txt");
 
-        TMatrix Result = model->getResult();
+        //TMatrix Result = model->getResult();
 
-        for (int i=0; i<Result.rowCount(); i++)
+        for (int i=0; i<model->Result.rowCount(); i++)
         {
-            for (int j=0; j<Result.colCount(); j++)
-                file << Result(i, j) << " ";
+            for (int j=0; j<model->Result.colCount(); j++)
+                file << model->Result(i, j) << " ";
 
             file << std::endl;
         }

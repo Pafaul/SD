@@ -81,7 +81,7 @@ long double TDormandPrinceIntegrator::Run(TModel* Model)
     //printf ("\n&&&&&&K\n");
 	
     // Главный цикл
-	while ( t < t1 )
+    while ( t < t1 )
     {
         // Устанавливаем шаг на итерацию
         h = h_new;
@@ -151,6 +151,7 @@ long double TDormandPrinceIntegrator::Run(TModel* Model)
         // Обновляем X и наращиваем время на величину сделанного шага
         X = X1;
         t += h;
+        if (Model->run(X, t)) for(int i = 3; i < 6; i++) X[i] = 0.0L;
 
         // Считаем количество итераций для вычисления глобальной погрешности
         N++;

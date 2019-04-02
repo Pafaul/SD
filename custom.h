@@ -15,7 +15,7 @@ protected:
     //Normal Random number generator
     //NormalGaussGenerator generator;
     // Grav const, satellite mass, rotation speed, aerofriction const, Earth radius, perigee height, apogee height
-    long double mu = 398600.436L, m = 50.0L, omega = 7.292115E-5L, CxS = 1.4L, Re = 6371.0L, Hp = 140.0L, Ha = 970.0L,
+    long double mu = 398600.436L*pow(1000.L, 3), m = 50.0L, omega = 7.292115E-5L, CxS = 1.4L, Re = 6371.0L*1000.0L, Hp = 140.0L*1000.0L, Ha = 970.0L*1000.0L,
                 //наклонение орбиты, ..., эксцентриситет, ...
                 i = 42.0L/360.0L*2*pi, u = pi/2.0L, e = sqrt(1.0L - pow(Re+Hp, 2)/pow(Re+Ha, 2)), p = (Re+Ha)*(1-e*e);
     //atmosphere parameters
@@ -30,6 +30,8 @@ protected:
     bool dropped = false;
 public:
     ArtificialSatellite();
-    void getRight( TVector& X, long double t, TVector& Y );
-    long double ro(long double distance, long double rand);
+    void getRight( const TVector& X, long double t, TVector& Y );
+    long double ro(long double distance, long double rand );
+    bool run ( const TVector& X, long double t );
+    //void addResult( const TVector& X, long double t );
 };

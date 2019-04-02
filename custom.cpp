@@ -49,7 +49,7 @@ ArtificialSatellite::ArtificialSatellite() : TModel ()
     X0[6] = 0;
     X0[7] = 0;
 
-    t0 = 0; t1 = 86400.L*1L; //SamplingIncrement = 1;
+    t0 = 0; t1 = 86400.L*10L; //SamplingIncrement = 1;
 }
 
 long double ArtificialSatellite::ro(long double distance, long double rand)
@@ -62,31 +62,57 @@ long double ArtificialSatellite::ro(long double distance, long double rand)
 
 }
 
-void ArtificialSatellite::getRight( TVector &X, long double t, TVector &Y )
+void ArtificialSatellite::getRight( const TVector &X, long double t, TVector &Y )
 {
     //if (t > time) { time += generator.getSamplingTime(); rand = generator.generate(); }
-    Y.resize(8);
-    dist = sqrt(X[0]*X[0]+X[1]*X[1]+X[2]*X[2]); h = dist - Re; //std::cout << "H = " << h << "; dist = " << dist << std::endl;
+    Y.resize(X.size());
+    dist = sqrt(X[0]*X[0]+X[1]*X[1]+X[2]*X[2]); h = dist - Re; //std::cout << "t = " << t << " ; H = " << h << " ; dist = " << dist << std::endl;
+    std::cout << "T = " << t << std::endl;
     //std::cout << "H = " << h << "; dist = " << dist << "; Re = " << Re << std::endl;
-    if ( h < 2 ) { dropped = true; for (int i = 0; i < 100; i++) std::cout << "dropped" << std::endl; }
+    //if ( h < 2 ) { dropped = true; for (int i = 0; i < 10; i++) std::cout << "dropped" << std::endl; }
     if ( dropped == false )
     {
         temp.resize(3); V.resize(3); for(int i = 0; i < 3; i++) { temp[i] = X[i]; V[i] = X[i+3]; }
-        Va.resize(3); Va = (V - EarthRotation^temp); //std::cout << "PreVA = " << Va[0] << " " << Va[1] << " " << Va[2] << std::endl;
+        temp = EarthRotation^temp;
+        Va.resize(3); Va = (V - temp); //std::cout << "PreVA = " << Va[0] << " " << Va[1] << " " << Va[2] << std::endl;
         //Va = (Va*(1000.0L*(-1.0L/m*CxS*ro(h*1000.0L, 0.0L)*Va.length()*1000.0L/2.0L)))*(1.0L/1000.0L); //std::cout << "VA = " << Va[0] << " " << Va[1] << " " << Va[2] << std::endl;
         Y[0] = X[3];
         Y[1] = X[4];
         Y[2] = X[5];
         //км/с^2 = км^3/c^2*км/км^3  - кг^(-1)*(км^2)*(кг/км^3)*км/с*км/с
                                        //кг^(-1)*(м^2)*(кг/м^3)*(м/с)*(м/с)
-        Y[3] = -mu*X[0]/pow(dist, 3) - (1.0L/m)*CxS*(ro(h*1000.0L, 0.0L)*Va.length()/2.0L)*Va[0]*1000.0L;//1000.0L;//+ Va[0];
-        Y[4] = -mu*X[1]/pow(dist, 3) - (1.0L/m)*CxS*(ro(h*1000.0L, 0.0L)*Va.length()/2.0L)*Va[1]*1000.0L;//1000.0L; //+ Va[1];
-        Y[5] = -mu*X[2]/pow(dist, 3) - (1.0L/m)*CxS*(ro(h*1000.0L, 0.0L)*Va.length()/2.0L)*Va[2]*1000.0L;//1000.0L; //+ Va[2];
+        Y[3] = -mu*X[0]/pow(dist, 3) - (1.0L/m)*CxS*(ro(h, 0.0L)*Va.length()/2.0L)*Va[0];//*1000.0L;//1000.0L;//+ Va[0];
+        Y[4] = -mu*X[1]/pow(dist, 3) - (1.0L/m)*CxS*(ro(h, 0.0L)*Va.length()/2.0L)*Va[1];//*1000.0L;//1000.0L; //+ Va[1];
+        Y[5] = -mu*X[2]/pow(dist, 3) - (1.0L/m)*CxS*(ro(h, 0.0L)*Va.length()/2.0L)*Va[2];//*1000.0L;//1000.0L; //+ Va[2];
         Y[6] = 0; //X[7];
         Y[7] = 0; //1/pow(T, 2) - 2*ksi/T*X[7] - 1/pow(T, 2)*X[6];
     } else {
         std::cout << "AES dropped" << std::endl;
         for (int i = 0; i < X.size(); i++) Y[i] = 0;
-        for (int i = 3; i < 6; i++) X[i] = 0;
+        //for (int i = 3; i < 6; i++) X[i] = 0;
     }
 }
+
+bool ArtificialSatellite::run( const TVector& X, long double t)
+{
+    h = sqrt((pow(X[0], 2) + pow(X[1], 2) + pow(X[2], 2))) - Re;
+    if (h >= 0) return true;
+    else { dropped = true; return false; }
+}
+
+/*void ArtificialSatellite::addResult(const TVector &X, long double t)
+{
+    if (dropped == false)
+        TModel::addResult(X, t);
+
+    else
+    {
+        if (first == true)
+        {
+            false = false;
+            TempX.resize(X.size());
+
+        }
+    }
+
+}*/
