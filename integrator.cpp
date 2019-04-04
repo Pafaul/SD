@@ -1,5 +1,5 @@
 
-#include <stdio.h>
+#include <iostream>
 #include <math.h>
 #include "integrator.h"
 #include "model.h"
@@ -86,39 +86,43 @@ long double TDormandPrinceIntegrator::Run(TModel* Model)
         // Устанавливаем шаг на итерацию
         h = h_new;
 		  // Вычисляем коэффициенты К
-        for ( int j = 0; j < 7; j++ )
+        if (Model->run(X, t))
         {
-            for ( int k = X.size()-1; k >= 0; k-- )
-            {
-                Y[k] = X[k];
-                for ( int s = 0; s < j; s++ )
-                {
-                    Y[k] += K[s][k] * a[j][s] * h;
-                }
-            }
-           Model->getRight( Y, t + c[j] * h, K[j] );
-        }
- // Вычисляем новые значения результатов и локальной ошибки (4 и 5 порядок)
-        e = 0;
-        for ( int k = X.size()-1; k >= 0; k-- )
-        {
-            X1[k] = X2[k] = X[k];
             for ( int j = 0; j < 7; j++ )
             {
-                X1[k] += K[j][k] * b1[j] * h;
-                X2[k] += K[j][k] * b2[j] * h;
+                for ( int k = X.size()-1; k >= 0; k-- )
+                {
+                    Y[k] = X[k];
+                    for ( int s = 0; s < j; s++ )
+                    {
+                        Y[k] += K[s][k] * a[j][s] * h;
+                    }
+                }
+               Model->getRight( Y, t + c[j] * h, K[j] );
             }
-            e += pow( h * (X1[k] - X2[k]) / max( max( fabsl(X[k]), fabsl(X1[k]) ), max((long double)1e-5, 2*u/Eps) ) , 2 );
-        }
-        e = sqrtl( e / X.size() );
+     // Вычисляем новые значения результатов и локальной ошибки (4 и 5 порядок)
+            e = 0;
+            for ( int k = X.size()-1; k >= 0; k-- )
+            {
+                X1[k] = X2[k] = X[k];
+                for ( int j = 0; j < 7; j++ )
+                {
+                    X1[k] += K[j][k] * b1[j] * h;
+                    X2[k] += K[j][k] * b2[j] * h;
+                }
+                e += pow( h * (X1[k] - X2[k]) / max( max( fabsl(X[k]), fabsl(X1[k]) ), max((long double)1e-5, 2*u/Eps) ) , 2 );
+            }
+            e = sqrtl( e / X.size() );
 
-        // Коррекция шага
-        h_new = h / max( 0.1, min( 5., pow(e / Eps, 0.2)/0.9 ) );
-        //std::cout << "H = " << h_new << "; eps = " << e << "; time = " << t << std::endl;
-	   // Если локальная ошибка превышает установленную величину, пытаемся сделать шаг заново
-        if ( e > Eps )
-            continue;
-		
+            // Коррекция шага
+            h_new = h / max( 0.1, min( 5., pow(e / Eps, 0.2)/0.9 ) );
+            //std::cout << "H = " << h_new << "; eps = " << e << "; time = " << t << std::endl;
+           // Если локальная ошибка превышает установленную величину, пытаемся сделать шаг заново
+            if ( e > Eps )
+                continue;
+        } else {
+            std::cout << "AES dropped" << std::endl;
+        }
         // Формирование результатов при помощи механизма плотной выдачи
 		while ( (t_out < t + h) && (t_out <= t1) )
         {
@@ -139,7 +143,10 @@ long double TDormandPrinceIntegrator::Run(TModel* Model)
                 long double l_ldSum  = 0;
                 for ( int j = 5; j >= 0; j-- )
                     l_ldSum += b[j] * K[j][k];
-                Xout[k] = X[k] + h * l_ldSum;
+                if (Model->run(X, t))
+                    Xout[k] = X[k] + h * l_ldSum;
+                else
+                    Xout[k] = X[k];
             }
 
             // Передача результата в модель
@@ -151,7 +158,7 @@ long double TDormandPrinceIntegrator::Run(TModel* Model)
         // Обновляем X и наращиваем время на величину сделанного шага
         X = X1;
         t += h;
-        if (Model->run(X, t)) for(int i = 3; i < 6; i++) X[i] = 0.0L;
+        if (Model->run(X, t) == false) for(int i = 3; i < 6; i++) X[i] = 0.0L;
 
         // Считаем количество итераций для вычисления глобальной погрешности
         N++;
