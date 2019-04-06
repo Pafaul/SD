@@ -6,9 +6,9 @@
 //---------------------------------------------------------------------------
 void TModel::addResult( const TVector& X, long double t )
 {
-
-	if (N == Result.rowCount())
-        Result.resize(N + 1, getOrder() + 1);
+    Result.resize(N + 1, getOrder() + 1);
+    //if (N == Result.rowCount())
+    //    Result.resize(N + 1, getOrder() + 1);
 
 	Result(N, 0) = t;
     for (int i = X.size(); i > 0 ; i--)
@@ -16,8 +16,7 @@ void TModel::addResult( const TVector& X, long double t )
 		Result(N, i) = X[i-1];
         //std::cout << Result(N, i) << std::endl;
     }
-
-	N++;
+    N++;
 }
 
 void TModel::clearResult() 
@@ -29,7 +28,6 @@ void TModel::clearResult()
 
 void TModel::prepareResult() 
 { 
-	Result.resize((int)((t1 - t0)/SamplingIncrement) + 1, getOrder() + 1);
 
 	N = 0; 
 }

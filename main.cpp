@@ -37,6 +37,7 @@ int main()
     TIntegrator* Integrator = new TDormandPrinceIntegrator();
     Integrator->setPrecision(1E-10);
     Integrator->Run( model );
+    model->finalize();
     writeRes(model);
     delete model;
     delete Integrator;

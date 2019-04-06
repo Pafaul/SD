@@ -3,13 +3,14 @@
 
 #include "LA.h"
 #include <math.h>
+#include <fstream>
 
 class Measure
 {
 protected:
     const long double pi = 3.14159265359L;
     // положение спутника (широта и долгота), высота над Землёй, радиус Земли
-    long double latitude = 18.0L/360.0L*2*pi, longtitude = 173.0L/360.0L*2*pi, h = 0, Re = 6731,
+    long double latitude = 18.0L/360.0L*2*pi, longtitude = 173.0L/360.0L*2*pi, h = 0, Re = 6731*1000.0L,
                 //угол обзора НИП-а, время предыдущего измерения, частота измерений, время начала работы
                 measureAngle = 150.0L/360.0L*2*pi, prevMeasureTime = 0.0L, frequency = 1.0L, t0 = 0.0L,
                 //скорость вращения Земли
@@ -23,6 +24,8 @@ protected:
     //AES_X0 = AES_Re + AES_X
     //N0 = Ne - R
     TVector N_Re, N0, R, R_Re, AES_Re, AES_X, AES_X0, temp;
+
+    std::ofstream measure_file;
 
 public:
     Measure(long double t0);
@@ -42,6 +45,8 @@ public:
     bool isMeasurable(const TVector& X, long double t);
     //собственно измерения
     void measure(const TVector& X, long double t);
+    //завершение работы
+    void finalize();
 };
 
 #endif // MEASURE_H

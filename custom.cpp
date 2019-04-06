@@ -24,6 +24,7 @@ ArtificialSatellite::ArtificialSatellite() : TModel ()
 {
     generator = new NormalGaussGenerator();
     generator->setOmega(50);
+
     A.resize(3, 3); startRotation.resize(3, 3);
     A(0, 0) = cos(u)*cos(pi/2)-sin(u)*sin(pi/2.0L)*cos(i); A(0, 1) = -sin(u)*cos(pi/2.0L)-cos(u)*sin(pi/2.0L)*cos(i); A(0, 2) = sin(i)*sin(pi/2.0L);
     A(1, 0) = cos(u)*sin(pi/2)+sin(u)*cos(pi/2.0L)*cos(i); A(1, 1) = -sin(u)*sin(pi/2.0L)+cos(u)*cos(pi/2.0L)*cos(i); A(1, 2) = sin(i)*cos(pi/2.0L);
@@ -50,6 +51,7 @@ ArtificialSatellite::ArtificialSatellite() : TModel ()
     X0[7] = 0;
 
     t0 = 0; t1 = 86400.L*15L; //SamplingIncrement = 1;
+    measure = new Measure_Rework();
 }
 
 long double ArtificialSatellite::ro(long double distance, long double rand)
@@ -90,9 +92,19 @@ void ArtificialSatellite::getRight( const TVector &X, long double t, TVector &Y 
     }
 }
 
-bool ArtificialSatellite::run( const TVector& X, long double t)
+bool ArtificialSatellite::run( const TVector& X, long double t )
 {
     h = sqrt((pow(X[0], 2) + pow(X[1], 2) + pow(X[2], 2))) - Re;
     if (h >= 0) return true;
-    else { dropped = true; return false; }
+    else { dropped = true; return false;  }
+}
+
+void ArtificialSatellite::do_thing( const TVector &X, long double t )
+{
+    measure->measure( X, t );
+}
+
+void ArtificialSatellite::finalize()
+{
+    measure->finalize();
 }

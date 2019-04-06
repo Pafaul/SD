@@ -7,6 +7,8 @@ Measure::Measure(long double t) : t0(t)
     N_Re.resize(3); N0.resize(3);
     R.resize(3); R_Re.resize(3);
     AES_Re.resize(3); AES_X.resize(3); AES_X0.resize(3);
+
+    measure_file.open("measures.txt", std::ios_base::out);
 }
 
 void Measure::calcN0()
@@ -25,10 +27,10 @@ void Measure::calcAES_X(const TVector& X)
 
 void Measure::calcR_Re(long double t)
 {
-    long double calc_latitude = latitude + omega * (t - t0);
-    R_Re[0] = Re*cos(longtitude)*cos(calc_latitude);
-    R_Re[1] = Re*cos(longtitude)*sin(calc_latitude);
-    R_Re[2] = Re*sin(longtitude);
+    long double calc_longtitude = longtitude + omega * (t - t0);
+    R_Re[0] = Re*cos(latitude)*cos(calc_longtitude);
+    R_Re[1] = Re*cos(latitude)*sin(calc_longtitude);
+    R_Re[2] = Re*sin(latitude);
 }
 
 void Measure::calcR(long double len) { R = R_Re*(len/R_Re.length()); }
@@ -48,8 +50,10 @@ long double Measure::calcE()
 bool Measure::isMeasurable(const TVector& X, long double t)
 {
     calcR_Re(t);
-    calcR(AES_X[2]);
     calcAES_X(X);
+    calcR(AES_X[2]);
+    //calcAES_X(X);
+    //радиус от точки на поверхности
     long double AES_R = sqrt(pow(AES_X[0] - R[0], 2) + pow(AES_X[1] - R[1], 2));
     long double measurableR = AES_X[2] * tan(measureAngle/2.0L);
     if ((measurableR > 0) && (AES_R <= measurableR)) return true; else return false;
@@ -64,5 +68,12 @@ void Measure::measure(const TVector &X, long double t)
         measures(measures.colCount()-1, 0) = t;
         measures(measures.colCount()-1, 1) = calcE();
         measures(measures.colCount()-1, 2) = calcA();
+        for (int i = 0; i < 3; i++) measure_file << measures(measures.colCount()-1, i) << " ";
+        measure_file << std::endl;
     }
+}
+
+void Measure::finalize()
+{
+    measure_file.close();
 }

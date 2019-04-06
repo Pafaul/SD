@@ -34,7 +34,9 @@ class TModel
         virtual void addResult( const TVector& X, long double t );
 		virtual void clearResult();
 		virtual void prepareResult();
-        virtual bool run( const TVector& X, long double t) { return true; }
+        virtual bool run( const TVector& X, long double t ) { return true; }
+        virtual void do_thing( const TVector& X, long double t ) = 0;
+        virtual void finalize() = 0;
 };
 
 //---------------------------------------------------------------------------

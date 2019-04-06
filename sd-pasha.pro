@@ -10,7 +10,8 @@ SOURCES += main.cpp \
     measure.cpp \
     model.cpp \
     normalgaussgenerator.cpp \
-    TQuaternion.cpp
+    TQuaternion.cpp \
+    measure_rework.cpp
 
 HEADERS += \
     custom.h \
@@ -19,4 +20,5 @@ HEADERS += \
     measure.h \
     model.h \
     normalgaussgenerator.h \
-    TQuaternion.h
+    TQuaternion.h \
+    measure_rework.h

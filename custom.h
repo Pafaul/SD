@@ -2,6 +2,7 @@
 
 #include "model.h"
 #include "normalgaussgenerator.h"
+#include "measure_rework.h"
 #include <math.h>
 #include <tuple>
 
@@ -31,9 +32,14 @@ protected:
     //упал ли ИСЗ
     bool dropped = false;
     int n = 0;
+
+    //проведение измерений
+    Measure_Rework* measure;
 public:
     ArtificialSatellite();
     void getRight( const TVector& X, long double t, TVector& Y );
     long double ro(long double distance, long double rand );
     bool run ( const TVector& X, long double t );
+    void do_thing( const TVector& X, long double t);
+    void finalize();
 };
