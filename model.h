@@ -2,7 +2,9 @@
 
 #pragma once
 
-#include "LA.h"
+
+#include "tvector.h"
+#include "tmatrix.h"
 
 //---------------------------------------------------------------------------
 
@@ -37,6 +39,7 @@ class TModel
         virtual bool run( const TVector& X, long double t ) { return true; }
         virtual void do_thing( const TVector& X, long double t ) = 0;
         virtual void finalize() = 0;
+//        virtual TMatrix get_measures() = 0;
 };
 
 //---------------------------------------------------------------------------

@@ -3,6 +3,8 @@
 #include <math.h>
 #include "integrator.h"
 #include "model.h"
+#include "tvector.h"
+#include "tmatrix.h"
 
 #define max(a, b) ( ( (a) > (b) ) ? (a) : (b) )
 #define min(a, b) ( ( (a) < (b) ) ? (a) : (b) )
@@ -116,7 +118,6 @@ long double TDormandPrinceIntegrator::Run(TModel* Model)
 
             // Коррекция шага
             h_new = h / max( 0.1, min( 5., pow(e / Eps, 0.2)/0.9 ) );
-            //std::cout << "H = " << h_new << "; eps = " << e << "; time = " << t << std::endl;
            // Если локальная ошибка превышает установленную величину, пытаемся сделать шаг заново
             if ( e > Eps )
                 continue;
@@ -155,11 +156,13 @@ long double TDormandPrinceIntegrator::Run(TModel* Model)
             t_out += Model->getSamplingIncrement();
         }
 
+        if ((int)t_out % 10000 == 0) std::cout /*<< "H = " << h_new << "; eps = " << e << ";*/ << "time = " << t << std::endl;
+
         // Обновляем X и наращиваем время на величину сделанного шага
         X = X1;
         t += h;
         Model->do_thing(X, t);
-        if (Model->run(X, t) == false) for(int i = 3; i < 6; i++) X[i] = 0.0L;
+//        if (Model->run(X, t) == false) for(int i = 3; i < 6; i++) X[i] = 0.0L;
 
         // Считаем количество итераций для вычисления глобальной погрешности
         N++;

@@ -7,12 +7,12 @@ Measure_Rework::Measure_Rework()
     NIP_R.resize(3); NIP_Re.resize(3); NIP_Se.resize(3);
     diff_R.resize(3); diff_Re.resize(3); diff_Se.resize(3);
     North_R.resize(3); North_Re.resize(3); North_Se.resize(3);
-    North_Direction.resize(3), North_E.resize(3);
+    North_Direction.resize(3); North_E.resize(3);
     //Result.resize(1, 3);
 
     North_E[0] = 0; North_E[1] = 0; North_E[2] = 1;
 
-    file.open("measures.txt", std::ios_base::out);
+    file.open("measures.txt");
 }
 
 void Measure_Rework::calcAES( const TVector &X, long double t )
@@ -50,14 +50,19 @@ void Measure_Rework::calcNorth()
 
 bool Measure_Rework::measurable( const TVector &X, long double t )
 {
-    //вычисление радиус-векторов
-    calcAES( X, t );
-    calcNIP( X, t );
-    calcDiff( X, t );
-    //вычисление радиуса окружности измерения НИПа на высоте полёта спутника
-    long double measure_R = AES_Se.length() * tan(measureAngle/2.0);
-    if (diff_R.length() < measure_R) return true;
-    else return false;
+    bool flag = false;
+    if (t >= prevMeasureTime + 1/frequency)
+    {
+        //вычисление радиус-векторов
+        calcAES( X, t );
+        calcNIP( X, t );
+        calcNorth();
+        calcDiff( X, t );
+        //вычисление радиуса окружности измерения НИПа на высоте полёта спутника
+        long double measure_R = AES_Se.length() * tan(measureAngle/2.0);
+        if (diff_R.length() < measure_R) flag = true;
+    }
+    return flag;
 
 }
 
@@ -74,16 +79,20 @@ long double Measure_Rework::calcE()
     return elevation;
 }
 
-void Measure_Rework::measure( const TVector &X, long double t )
+void Measure_Rework::measure( const TVector &X, long double t, bool main )
 {
-    if (measurable( X, t ))
+    if ((measurable( X, t ) && main) || !main)
     {
+        prevMeasureTime = t;
         calcNorth();
-        Result.resize(Result.colCount()+1, 3);
-        Result(Result.colCount()-1, 0) = t;
-        Result(Result.colCount()-1, 1) = calcA();
-        Result(Result.colCount()-1, 2) = calcE();
-        for (int i = 0; i < 3; i++) file << Result(Result.colCount()-1, i) << " ";
+        Result.resize(Result.col_count()+1, 3);
+        Result[Result.col_count()-1][0] = t;
+        Result[Result.col_count()-1][1] = calcA();
+        Result[Result.col_count()-1][2] = calcE();
+        for (int i = 0; i < 3; i++) file << Result[Result.col_count()-1][i] << " ";
+        for (int i = 0; i < 3; i++) file << NIP_Se[i] << " ";
+        for (int i = 0; i < 3; i++) file << AES_Re[i] << " ";
+        for (int i = 0; i < 3; i++) file << North_Direction[i] << " ";
         file << std::endl;
     }
 }

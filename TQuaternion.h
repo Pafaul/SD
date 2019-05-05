@@ -1,6 +1,8 @@
 #ifndef TQUATERNION_H
 #define TQUATERNION_H
-#include "LA.h"
+
+#include "tvector.h"
+#include "tmatrix.h"
 
 
 class TQuaternion

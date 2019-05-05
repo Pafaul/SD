@@ -11,6 +11,10 @@
 class ArtificialSatellite : public TModel
 {
 protected:
+    //рассчитываем ли мы опорную траекторию; рассчитываем ли с отклонениями
+    bool main_trajectory = true, calc_eps = false;
+    //номер измерения; параметр, который отклоняем
+    int measure_num = 0, eps_num;
     //consts
     long double k = 0.07116714149L, T = 15.91347897L, ksi = 0.01591348171L, pi = 3.14159265359L, time = 0.0L, rand = 0.0L;
     //Normal Random number generator
@@ -32,14 +36,15 @@ protected:
     //упал ли ИСЗ
     bool dropped = false;
     int n = 0;
-
-    //проведение измерений
-    Measure_Rework* measure;
 public:
-    ArtificialSatellite();
+    ArtificialSatellite( );
+    ArtificialSatellite( const TVector& X, bool with_eps, int num, long double eps);
+
     void getRight( const TVector& X, long double t, TVector& Y );
-    long double ro(long double distance, long double rand );
+    long double ro( long double distance, long double rand );
     bool run ( const TVector& X, long double t );
     void do_thing( const TVector& X, long double t);
+//    TMatrix get_measures() { return measure->Result; } ;
+//    TMatrix get_derivative() { return derivative; };
     void finalize();
 };

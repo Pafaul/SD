@@ -1,6 +1,8 @@
 #ifndef MEASURE_REWORK_H
 #define MEASURE_REWORK_H
-#include "LA.h"
+
+#include "tvector.h"
+#include "tmatrix.h"
 #include <fstream>
 
 class Measure_Rework
@@ -24,7 +26,7 @@ public:
             North_E; //единичное направление на Север
     TMatrix Result;
     std::ofstream file;
-    void measure ( const TVector& X, long double t );    //само измерение
+    void measure ( const TVector& X, long double t, bool main );    //само измерение
     bool measurable( const TVector& X, long double t );  //можно ли измерить спуник
     void calcAES( const TVector& X, long double t );     //расчёт радиус-векторов ИСЗ
     void calcNIP( const TVector& X, long double t );     //расчёт радиус-векторов НИПа

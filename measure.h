@@ -1,7 +1,8 @@
 #ifndef MEASURE_H
 #define MEASURE_H
 
-#include "LA.h"
+#include "tvector.h"
+#include "tmatrix.h"
 #include <math.h>
 #include <fstream>
 

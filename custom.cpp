@@ -4,7 +4,9 @@
 #include <iostream>
 #include "custom.h"
 
-#include "LA.h"
+#include "tvector.h"
+#include "tmatrix.h"
+
 
 //---------------------------------------------------------------------------
 
@@ -26,13 +28,13 @@ ArtificialSatellite::ArtificialSatellite() : TModel ()
     generator->setOmega(50);
 
     A.resize(3, 3); startRotation.resize(3, 3);
-    A(0, 0) = cos(u)*cos(pi/2)-sin(u)*sin(pi/2.0L)*cos(i); A(0, 1) = -sin(u)*cos(pi/2.0L)-cos(u)*sin(pi/2.0L)*cos(i); A(0, 2) = sin(i)*sin(pi/2.0L);
-    A(1, 0) = cos(u)*sin(pi/2)+sin(u)*cos(pi/2.0L)*cos(i); A(1, 1) = -sin(u)*sin(pi/2.0L)+cos(u)*cos(pi/2.0L)*cos(i); A(1, 2) = sin(i)*cos(pi/2.0L);
-    A(2, 0) = sin(u)*sin(i);                               A(2, 1) = cos(u)*sin(i);                                   A(2, 2) = cos(i);
+    A[0][0] = cos(u)*cos(pi/2)-sin(u)*sin(pi/2.0L)*cos(i); A[0][1] = -sin(u)*cos(pi/2.0L)-cos(u)*sin(pi/2.0L)*cos(i); A[0][2] = sin(i)*sin(pi/2.0L);
+    A[1][0] = cos(u)*sin(pi/2)+sin(u)*cos(pi/2.0L)*cos(i); A[1][1] = -sin(u)*sin(pi/2.0L)+cos(u)*cos(pi/2.0L)*cos(i); A[1][2] = sin(i)*cos(pi/2.0L);
+    A[2][0] = sin(u)*sin(i);                               A[2][1] = cos(u)*sin(i);                                   A[2][2] = cos(i);
 
-    startRotation(0, 0) = cos(i);  startRotation(0, 1) = 0; startRotation(0, 2) = sin(i);
-    startRotation(1, 0) = 0;       startRotation(1, 1) = 1; startRotation(1, 2) = 0;
-    startRotation(2, 0) = -sin(i); startRotation(2, 1) = 0; startRotation(2, 2) = cos(i);
+    startRotation[0][0] = cos(i);  startRotation[0][1] = 0; startRotation[0][2] = sin(i);
+    startRotation[1][0] = 0;       startRotation[1][1] = 1; startRotation[1][2] = 0;
+    startRotation[2][0] = -sin(i); startRotation[2][1] = 0; startRotation[2][2] = cos(i);
 
     X0.resize(8); temp.resize(3); Ve.resize(3); EarthRotation.resize(3);
     temp[0] = Re+Hp; temp[1] = 0; temp[2] = 0; temp = startRotation*temp;
@@ -44,14 +46,26 @@ ArtificialSatellite::ArtificialSatellite() : TModel ()
     X0[0] = temp[0];
     X0[1] = temp[1];
     X0[2] = temp[2];
-    X0[3] = Ve[0];
-    X0[4] = Ve[1];
-    X0[5] = Ve[2];
+    X0[3] = Ve[0]*0.97L;
+    X0[4] = Ve[1]*0.97L;
+    X0[5] = Ve[2]*0.97L;
     X0[6] = 0;
     X0[7] = 0;
 
-    t0 = 0; t1 = 86400.L*15L; //SamplingIncrement = 1;
-    measure = new Measure_Rework();
+    t0 = 0; t1 = 100000.0L/*86400.L*15L*/; SamplingIncrement = 1;
+    std::cout << "Main created" << std::endl;
+}
+
+ArtificialSatellite::ArtificialSatellite( const TVector& X, bool with_eps, int num, long double eps) : ArtificialSatellite()
+{
+    main_trajectory = false; calc_eps = with_eps;
+    eps_num = num;
+
+    for (int i = 0; i < 6; i++)
+        X0[i] = X[i];
+
+    if (with_eps) { X0[num] += eps; std::cout << "derivative created" << std::endl; }
+    else std::cout << "MNK created" << std::endl;
 }
 
 long double ArtificialSatellite::ro(long double distance, long double rand)
@@ -101,10 +115,9 @@ bool ArtificialSatellite::run( const TVector& X, long double t )
 
 void ArtificialSatellite::do_thing( const TVector &X, long double t )
 {
-    measure->measure( X, t );
 }
 
 void ArtificialSatellite::finalize()
 {
-    measure->finalize();
+    Result.resize(Result.row_count()-1, Result.col_count());
 }

@@ -64,11 +64,11 @@ void Measure::measure(const TVector &X, long double t)
 {
     if (isMeasurable(X, t))
     {
-        measures.resize(measures.rowCount()+1, 3);
-        measures(measures.colCount()-1, 0) = t;
-        measures(measures.colCount()-1, 1) = calcE();
-        measures(measures.colCount()-1, 2) = calcA();
-        for (int i = 0; i < 3; i++) measure_file << measures(measures.colCount()-1, i) << " ";
+        measures.resize(measures.row_count()+1, 3);
+        measures[measures.col_count()-1][0] = t;
+        measures[measures.col_count()-1][1] = calcE();
+        measures[measures.col_count()-1][2] = calcA();
+        for (int i = 0; i < 3; i++) measure_file << measures[measures.col_count()-1][i] << " ";
         measure_file << std::endl;
     }
 }
