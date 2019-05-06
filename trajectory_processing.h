@@ -16,8 +16,8 @@ protected:
 public:
     Trajectory_Processing();
     void process_trajectory(const TMatrix& trajectory);
-    void process_trajectory(const TMatrix& trajectory, bool main);
-    void process_trajectory(const TMatrix& trajectory, const TMatrix& main_measures, long double delta_x, long double delta_v, TMatrix& derivatives, const TModel* models);
+    void process_trajectory(const TMatrix &trajectory, bool main, TMatrix& der_measures);
+    void process_trajectory(const TMatrix& trajectory, long double delta_x, long double delta_v, TMatrix& derivatives, const TModel* models);
     const TMatrix& get_measures() const { return measures; }
 };
 

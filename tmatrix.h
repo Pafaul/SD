@@ -18,6 +18,8 @@ public:
     inline int row_count() const { return data.size(); }
     //количество столбцов
     inline int col_count() const { return data.back().size(); }
+    //изменение положения строк
+    TMatrix& swap_rows(int i, int j);
     //изменение размера матрицы
     void resize(int n, int m);
     TMatrix& operator = (const TMatrix& rval);
@@ -34,6 +36,14 @@ public:
     TMatrix operator * (const TMatrix& rval) const;
     //умножение матрицы на вектор
     TVector operator * (const TVector& rval) const;
+
+    //обращение матрицы
+    TMatrix operator !() const;
+    //транспонирование матрицы
+    TMatrix t() const;
+
+    static TMatrix E(int n);
+
     ~TMatrix();
 };
 

@@ -83,17 +83,30 @@ void Measure_Rework::measure( const TVector &X, long double t, bool main )
 {
     if ((measurable( X, t ) && main) || !main)
     {
+        //вычисление радиус-векторов
+        calcAES( X, t );
+        calcNIP( X, t );
+        calcNorth();
+        calcDiff( X, t );
+        //вычисление радиуса окружности измерения НИПа на высоте полёта спутника
+        long double measure_R = AES_Se.length() * tan(measureAngle/2.0);
+        cur_result.resize(3);
         prevMeasureTime = t;
         calcNorth();
-        Result.resize(Result.col_count()+1, 3);
+        cur_result[0] = t;
+        cur_result[1] = calcA();
+        cur_result[2] = calcE();
+        /*Result.resize(Result.col_count()+1, 3);
         Result[Result.col_count()-1][0] = t;
         Result[Result.col_count()-1][1] = calcA();
         Result[Result.col_count()-1][2] = calcE();
+        /*
         for (int i = 0; i < 3; i++) file << Result[Result.col_count()-1][i] << " ";
         for (int i = 0; i < 3; i++) file << NIP_Se[i] << " ";
         for (int i = 0; i < 3; i++) file << AES_Re[i] << " ";
         for (int i = 0; i < 3; i++) file << North_Direction[i] << " ";
         file << std::endl;
+        */
     }
 }
 

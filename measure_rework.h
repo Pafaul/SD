@@ -25,6 +25,7 @@ public:
             North_Direction, //направление на Север из НИПа
             North_E; //единичное направление на Север
     TMatrix Result;
+    TVector cur_result;
     std::ofstream file;
     void measure ( const TVector& X, long double t, bool main );    //само измерение
     bool measurable( const TVector& X, long double t );  //можно ли измерить спуник

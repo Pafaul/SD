@@ -62,44 +62,47 @@ int main()
 
     TMatrix temp;
     TMatrix* H = new TMatrix();
-    TMatrix* derivatives = new TMatrix(model->Result.row_count(), 7);
+    TMatrix derivatives = TMatrix(measure_model->get_measures().row_count()*2, 6);
+    TMatrix der_arr [12];
+    for (int i = 0; i < 12; i++)
+        der_arr[i] = TMatrix(measure_model->get_measures().row_count(), measure_model->get_measures().col_count());
 
-        ArtificialSatellite* derivative_models = new ArtificialSatellite[12];
+        ArtificialSatellite* derivative_models[12];
         for (int i = 0; i < 3; i++)
         {
-            derivative_models[2*i] = ArtificialSatellite( X, true, i, der_x );
-            derivative_models[2*i+1] = ArtificialSatellite( X, true, i, -der_x );
-            derivative_models[2*i+6] = ArtificialSatellite( X, true, i+3, der_v );
-            derivative_models[2*i+1+6] = ArtificialSatellite( X, true, i+3, -der_v );
+            derivative_models[2*i] = new ArtificialSatellite( X, true, i, der_x );
+            derivative_models[2*i+1] = new ArtificialSatellite( X, true, i, -der_x );
+            derivative_models[2*i+6] = new ArtificialSatellite( X, true, i+3, der_v );
+            derivative_models[2*i+1+6] = new ArtificialSatellite( X, true, i+3, -der_v );
         }
         for(int i = 0; i < 12; i++)
         {
             filename = "der_" + std::to_string(i) + ".txt";
-            Integrator->Run( &derivative_models[i] );
+            std::cout << "Model " << i << " is running." << std::endl;
+            Integrator->Run( derivative_models[i] );
  /*           temp.resize(derivative_models[i].getResult().rowCount(), derivative_models[i].getResult().colCount());
             for (int i = 0; i < temp.rowCount(); i++)
                 for (int j = 0; j < temp.colCount(); j++)
                     temp(i,j) = derivative_models[i].getResult()(i,j);*/
-            writeRes(derivative_models[i].getResult(), filename);
+            writeRes(derivative_models[i]->getResult(), filename);
+            measure_model->process_trajectory((derivative_models[i]->Result), false, der_arr[i]);
         }
 
-        derivatives->resize(measure_model->get_measures().row_count(), 6);
-        int count = 0;
+        std::cout << "calc derivatives" << std::endl;
+        derivatives.resize(measure_model->get_measures().row_count()*2, 6);
         long double der = 0.0L;
-        for (int i = 0; i < derivative_models[0].getResult().row_count(); i++)
+        for (int i = 0; i < 2; i++)
         {
-            if (derivative_models[0].getResult()[i][0] == measure_model->get_measures()[count][0])
+            for (int count = 0; count < measure_model->get_measures().row_count(); count ++)
             {
-
                 for (int j = 0; j < 6; j++)
                 {
                     if (j < 3) der = der_x;
                     else der = der_v;
-                    if (derivatives->row_count() < count + 1)
-                        derivatives->resize(derivatives->row_count()+1, 6);
-                    derivatives[count][j] = (derivative_models[2*j].getResult()[i][j+1] - derivative_models[2*j+1].getResult()[i][j+1])/der;
+                    derivatives[count*2+i][j] = (
+                                der_arr[j*2][count][i+1]-
+                            der_arr[j*2+1][count][i+1])/der;
                 }
-                count ++;
             }
         }
         /*measure_model->process_trajectory(
@@ -110,9 +113,9 @@ int main()
                     *derivatives,
                     derivative_models);*/
         filename = "derivatives.txt";
-        writeRes(*derivatives, filename);
+        writeRes(derivatives, filename);
 
-        delete [] derivative_models;
+        //delete derivative_models;
 
 
 
