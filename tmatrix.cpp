@@ -59,8 +59,9 @@ TMatrix TMatrix::operator * (long double rval) const
 {
     TMatrix temp(this->row_count(), this->col_count());
     for (int i = 0; i < this->row_count(); i++)
-        for (int j = 0; j < this->col_count(); j++)
-            temp[i][j] = this->data[i][j] * rval;
+        /*for (int j = 0; j < this->col_count(); j++)
+            temp[i][j] = this->data[i][j] * rval;*/
+        temp[i][i] = this->data[i][i]*rval;
     return temp;
 }
 
