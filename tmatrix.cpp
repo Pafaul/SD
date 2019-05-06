@@ -105,10 +105,10 @@ TMatrix TMatrix::operator !() const
                 {
                     A.swap_rows(i, k);
                     X.swap_rows(i, k);
-
                     break;
                 }
         }
+        tmp = A[i][i];
 
         for (int j = 0; j < n; j++)
         {
@@ -147,7 +147,7 @@ TMatrix TMatrix::t() const
     return temp;
 }
 
-TMatrix TMatrix::E(int n)
+TMatrix TMatrix::E(int n) const
 {
     TMatrix temp(n, n);
     for (int i = 0; i < temp.row_count(); i++)
