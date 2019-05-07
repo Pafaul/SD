@@ -59,9 +59,8 @@ TMatrix TMatrix::operator * (long double rval) const
 {
     TMatrix temp(this->row_count(), this->col_count());
     for (int i = 0; i < this->row_count(); i++)
-        /*for (int j = 0; j < this->col_count(); j++)
-            temp[i][j] = this->data[i][j] * rval;*/
-        temp[i][i] = this->data[i][i]*rval;
+        for (int j = 0; j < this->col_count(); j++)
+            temp[i][j] = this->data[i][j] * rval;
     return temp;
 }
 
@@ -105,10 +104,10 @@ TMatrix TMatrix::operator !() const
                 {
                     A.swap_rows(i, k);
                     X.swap_rows(i, k);
+
                     break;
                 }
         }
-        tmp = A[i][i];
 
         for (int j = 0; j < n; j++)
         {
@@ -134,14 +133,7 @@ TMatrix TMatrix::operator !() const
 
 TMatrix& TMatrix::swap_rows(int i, int j)
 {
-    long double buff;
-    for (int k = 0; k < this->col_count(); k++)
-    {
-        buff = this->data[i][k];
-        this->data[i][k] = this->data[j][k];
-        this->data[j][k] = buff;
-    }
-    //std::swap(this->data[j], this->data[i]);
+    std::swap(this->data[j], this->data[i]);
     return *this;
 }
 
@@ -154,7 +146,7 @@ TMatrix TMatrix::t() const
     return temp;
 }
 
-TMatrix TMatrix::E(int n) const
+TMatrix TMatrix::E(int n)
 {
     TMatrix temp(n, n);
     for (int i = 0; i < temp.row_count(); i++)

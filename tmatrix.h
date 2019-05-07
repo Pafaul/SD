@@ -42,7 +42,7 @@ public:
     //транспонирование матрицы
     TMatrix t() const;
 
-    TMatrix E(int n) const;
+    static TMatrix E(int n);
 
     ~TMatrix();
 };
