@@ -134,7 +134,14 @@ TMatrix TMatrix::operator !() const
 
 TMatrix& TMatrix::swap_rows(int i, int j)
 {
-    std::swap(this->data[j], this->data[i]);
+    long double buff;
+    for (int k = 0; k < this->col_count(); k++)
+    {
+        buff = this->data[i][k];
+        this->data[i][k] = this->data[j][k];
+        this->data[j][k] = buff;
+    }
+    //std::swap(this->data[j], this->data[i]);
     return *this;
 }
 

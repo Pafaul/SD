@@ -46,9 +46,9 @@ ArtificialSatellite::ArtificialSatellite() : TModel ()
     X0[0] = temp[0];
     X0[1] = temp[1];
     X0[2] = temp[2];
-    X0[3] = Ve[0]*0.97L;
-    X0[4] = Ve[1]*0.97L;
-    X0[5] = Ve[2]*0.97L;
+    X0[3] = Ve[0]*0.95L;
+    X0[4] = Ve[1]*0.95L;
+    X0[5] = Ve[2]*0.95L;
     X0[6] = 0;
     X0[7] = 0;
 

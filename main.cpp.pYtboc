@@ -29,7 +29,7 @@ void matrix_copy_measures(const Trajectory_Processing& A, TMatrix& B);
 int main()
 {
     long double eps = 10;
-    long double delta_main_x = -50; long double delta_main_v = -5;
+    long double delta_main_x = 100; long double delta_main_v = 10;
     long double dispersion = 0.0052;
     std::string filename;
     TModel* model = new ArtificialSatellite();
@@ -50,7 +50,7 @@ int main()
     writeMatrix(main_measures, filename);
 
     TVector X0 = TVector(6); for (int i = 0; i < 6; i++) X0[i] = model->getInitialConditions()[i];
-    long double der_x = 0.01, der_v = 0.01;
+    long double der_x = 1, der_v = 1;
     TVector /*delta_X, delta_Y,*/ X; TVector delta_X;
     /*delta_X.resize(6); delta_Y.resize(6);*/ X.resize(6);
     for (int i = 0; i < 6; i++) { /*delta_X[i] = 0.0; delta_Y[i] = 0.0;*/ X[i] = model->getInitialConditions()[i]; }
@@ -134,11 +134,11 @@ int main()
        writeVector(delta_X, "delta_x.txt");
        std::cout << "Vector delta_X: " << std::endl; print_vector(delta_X);
        std::cout << "Vector X: " << std::endl; print_vector(X);
-       for (int i = 0; i < 6; i++ )
-           X[i] += delta_X[i];
+       X = X + delta_X;
        std::cout << "New vector X: " << std::endl; print_vector(X);
        std::cout << "Real vector X: " << std::endl; print_vector(model->getInitialConditions());
-
+       for (int i = 0; i < 12; i++)
+           der_arr[i].~TMatrix();
     }
 
     delete model;
