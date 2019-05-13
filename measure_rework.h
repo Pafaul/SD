@@ -3,6 +3,7 @@
 
 #include "tvector.h"
 #include "tmatrix.h"
+#include "normalgaussgenerator.h"
 #include <fstream>
 
 class Measure_Rework
@@ -27,6 +28,7 @@ public:
     TMatrix Result;
     TVector cur_result;
     std::ofstream file;
+    NormalGaussGenerator rand_gen;
     void measure ( const TVector& X, long double t, bool main );    //само измерение
     bool measurable( const TVector& X, long double t );  //можно ли измерить спуник
     void calcAES( const TVector& X, long double t );     //расчёт радиус-векторов ИСЗ

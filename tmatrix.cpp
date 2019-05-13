@@ -12,6 +12,7 @@ TMatrix::TMatrix(int n, int m)
 TMatrix::TMatrix(const TMatrix &rval)
 {
     this->data.assign(rval.data.begin(), rval.data.end());
+    this->n = rval.n; this->m = rval.m;
     //for (int i = 0; i < )
 }
 
@@ -26,6 +27,7 @@ void TMatrix::resize(int n, int m)
 TMatrix& TMatrix::operator = (const TMatrix& rval)
 {
     this->data.assign(rval.data.begin(), rval.data.end());
+    this->n = rval.n; this->m = rval.m;
     return (*this);
 }
 
@@ -90,7 +92,7 @@ TVector TMatrix::operator * (const TVector& rval) const
 
 }
 
-TMatrix TMatrix::operator !() const
+TMatrix TMatrix::operator !()
 {
     TMatrix X( E(this->row_count()) ), A(*this);
     long double tmp;
@@ -108,6 +110,8 @@ TMatrix TMatrix::operator !() const
                     break;
                 }
         }
+
+        tmp = A[i][i];
 
         for (int j = 0; j < n; j++)
         {
@@ -154,7 +158,7 @@ TMatrix TMatrix::E(int n)
     return temp;
 }
 
-TMatrix::~TMatrix()
+/*TMatrix::~TMatrix()
 {
-    this->data.erase(this->data.begin(), this->data.end());
-}
+    //this->data.erase(this->data.begin(), this->data.end());
+}*/

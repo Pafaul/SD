@@ -13,6 +13,8 @@ Measure_Rework::Measure_Rework()
     North_E[0] = 0; North_E[1] = 0; North_E[2] = 1;
 
     file.open("measures.txt");
+    rand_gen = NormalGaussGenerator();
+    rand_gen.setDispersion(1.59989e-5);
 }
 
 void Measure_Rework::calcAES( const TVector &X, long double t )
@@ -38,14 +40,13 @@ void Measure_Rework::calcDiff( const TVector &X, long double t )
 {
     diff_R  = AES_R  - NIP_R; //разница между векторами
     diff_Re = AES_Re - NIP_Re; //от НИПа до проекции спутника на землю
-    diff_Se = AES_R - NIP_Re; //От НИПа до спутника
+    diff_Se = NIP_R - AES_R; //От НИПа до спутника
 }
 
 void Measure_Rework::calcNorth()
 {
-    long double alfa_cos = North_E*NIP_Re/(NIP_Re.length()*North_E.length());
-    North_R = North_E*(NIP_Re.length()/alfa_cos);
-    North_Direction = North_R - NIP_Re; North_Direction = North_Direction*(1/(North_Direction.length()));
+    North_R = North_E * (NIP_Re.length()/cos(pi/2-latitude));
+    North_Direction = North_R - NIP_Re;
 }
 
 bool Measure_Rework::measurable( const TVector &X, long double t )
@@ -58,9 +59,15 @@ bool Measure_Rework::measurable( const TVector &X, long double t )
         calcNIP( X, t );
         calcNorth();
         calcDiff( X, t );
-        //вычисление радиуса окружности измерения НИПа на высоте полёта спутника
-        long double measure_R = AES_Se.length() * tan(measureAngle/2.0);
-        if (diff_R.length() < measure_R) flag = true;
+
+        long double alfa = acos((diff_Se * NIP_Se)/NIP_Se.length()/diff_Se.length());
+        file << t << " " << alfa << " ";
+        for (int i = 0; i < 3; i++)
+            file << NIP_Re[i] << " ";
+        file << std::endl;
+        if (!((alfa >= 0) && (alfa <= 0.4166666666L*pi)))
+            flag = true;
+
     }
     return flag;
 
@@ -68,14 +75,21 @@ bool Measure_Rework::measurable( const TVector &X, long double t )
 
 long double Measure_Rework::calcA()
 {
+    //long double cos_azimut = acos(diff_Re*North_Direction/(diff_Re.length()*North_Direction.length()));
+    //return cos_azimut + rand_gen.generate();
     long double cos_azimut = acos(diff_Re*North_Direction/(diff_Re.length()*North_Direction.length()));
     return cos_azimut;
+
 
 }
 
 long double Measure_Rework::calcE()
 {
-    long double elevation = acos(diff_Se*diff_Re/(diff_Se.length()*diff_Re.length()));
+    long double elevation = pi/2 - acos((NIP_Se * diff_Se)/NIP_Re.length()/AES_R.length());
+    //return elevation + rand_gen.generate();
+    //long double elevation = acos(diff_Se*diff_Re/(diff_Se.length()*diff_Re.length()));
+    //long double len = 0.0L;
+    //for (int i = 0; i < 3; i++) len += pow(diff_Se[i], 2);
     return elevation;
 }
 
@@ -88,8 +102,6 @@ void Measure_Rework::measure( const TVector &X, long double t, bool main )
         calcNIP( X, t );
         calcNorth();
         calcDiff( X, t );
-        //вычисление радиуса окружности измерения НИПа на высоте полёта спутника
-        long double measure_R = AES_Se.length() * tan(measureAngle/2.0);
         cur_result.resize(3);
         prevMeasureTime = t;
         calcNorth();

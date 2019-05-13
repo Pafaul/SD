@@ -156,7 +156,7 @@ long double TDormandPrinceIntegrator::Run(TModel* Model)
             t_out += Model->getSamplingIncrement();
         }
 
-        if ((int)t_out % 10000 == 0) std::cout /*<< "H = " << h_new << "; eps = " << e << ";*/ << "time = " << t << std::endl;
+//        if ((int)t_out % 10000 == 0) std::cout /*<< "H = " << h_new << "; eps = " << e << ";*/ << "time = " << t << std::endl;
 
         // Обновляем X и наращиваем время на величину сделанного шага
         X = X1;

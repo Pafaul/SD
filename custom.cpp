@@ -46,14 +46,14 @@ ArtificialSatellite::ArtificialSatellite() : TModel ()
     X0[0] = temp[0];
     X0[1] = temp[1];
     X0[2] = temp[2];
-    X0[3] = Ve[0]*0.95L;
-    X0[4] = Ve[1]*0.95L;
-    X0[5] = Ve[2]*0.95L;
+    X0[3] = Ve[0];//*0.95L;
+    X0[4] = Ve[1];//*0.95L;
+    X0[5] = Ve[2];//*0.95L;
     X0[6] = 0;
     X0[7] = 0;
 
-    t0 = 0; t1 = 100000.0L/*86400.L*15L*/; SamplingIncrement = 1;
-    std::cout << "Main created" << std::endl;
+    t0 = 0; t1 = 25000.0L/*86400.L*15L*/; SamplingIncrement = 1;
+    //std::cout << "Main created" << std::endl;
 }
 
 ArtificialSatellite::ArtificialSatellite( const TVector& X, bool with_eps, int num, long double eps) : ArtificialSatellite()
@@ -64,7 +64,7 @@ ArtificialSatellite::ArtificialSatellite( const TVector& X, bool with_eps, int n
     for (int i = 0; i < 6; i++)
         X0[i] = X[i];
 
-    if (with_eps) { X0[num] += eps; std::cout << "derivative created" << std::endl; }
+    if (with_eps) { X0[num] += eps; /*std::cout << "derivative created" << std::endl; */}
     else std::cout << "MNK created" << std::endl;
 }
 
@@ -95,9 +95,9 @@ void ArtificialSatellite::getRight( const TVector &X, long double t, TVector &Y 
         Y[2] = X[5];
         //км/с^2 = км^3/c^2*км/км^3  - кг^(-1)*(км^2)*(кг/км^3)*км/с*км/с
                                        //кг^(-1)*(м^2)*(кг/м^3)*(м/с)*(м/с)
-        Y[3] = -mu*X[0]/pow(dist, 3) - (1.0L/m)*CxS*(ro(h, atmosRoDeviation)*Va.length()/2.0L)*Va[0];
-        Y[4] = -mu*X[1]/pow(dist, 3) - (1.0L/m)*CxS*(ro(h, atmosRoDeviation)*Va.length()/2.0L)*Va[1];
-        Y[5] = -mu*X[2]/pow(dist, 3) - (1.0L/m)*CxS*(ro(h, atmosRoDeviation)*Va.length()/2.0L)*Va[2];
+        Y[3] = -mu*X[0]/pow(dist, 3); //- (1.0L/m)*CxS*(ro(h, atmosRoDeviation)*Va.length()/2.0L)*Va[0];
+        Y[4] = -mu*X[1]/pow(dist, 3); //- (1.0L/m)*CxS*(ro(h, atmosRoDeviation)*Va.length()/2.0L)*Va[1];
+        Y[5] = -mu*X[2]/pow(dist, 3); //- (1.0L/m)*CxS*(ro(h, atmosRoDeviation)*Va.length()/2.0L)*Va[2];
         Y[6] = X[7];
         Y[7] = 1/pow(T, 2) - 2*ksi/T*X[7] - 1/pow(T, 2)*X[6] + 1/pow(T, 2)*noise;
     } else {
