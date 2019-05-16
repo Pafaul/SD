@@ -14,7 +14,7 @@ Measure::Measure(long double t) : t0(t)
 void Measure::calcN0()
 {
     calcR_Re(t0); temp.resize(3); temp[0] = 0; temp[1] = 0; temp[2] = 1;
-    N_Re = temp*(R.length()/cos(pi/2 - longtitude));
+    N_Re = temp*(R.length()/cos(pi/2 - longtitude)); R.
     N0 = N_Re - R;
 }
 

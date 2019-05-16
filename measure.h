@@ -5,6 +5,7 @@
 #include "tmatrix.h"
 #include <math.h>
 #include <fstream>
+#include <model.h>
 
 class Measure
 {
@@ -17,14 +18,14 @@ protected:
                 //скорость вращения Земли
                 omega = 7.292115E-5L;
     //Матрица для перезода из топографической в геоцентрическую СК; матрица измерений
-    TMatrix rotationMatrix, measures;
+    mat rotationMatrix, measures;
     //вектора: направление на Север из центра Земли, направление на Север из места расположения НИП-а, радиус-вектор измерений НИП-а из точки на Земле,
     //радиус-вектор из центра Земли до НИП-а, радиус-вектор из центра Земли до поверзности Земли для ИСЗ, радиус-вектор от поверхности Земли до ИСЗ,
     //Радиус-вектор из центра Земли до ИСЗ, вектор для разных разностей.
     //ПРИМЕЧАНИЯ:
     //AES_X0 = AES_Re + AES_X
     //N0 = Ne - R
-    TVector N_Re, N0, R, R_Re, AES_Re, AES_X, AES_X0, temp;
+    vec N_Re, N0, R, R_Re, AES_Re, AES_X, AES_X0, temp;
 
     std::ofstream measure_file;
 
@@ -37,15 +38,15 @@ public:
     //расчёт радиус-вектора из центра Земли к НИП-у
     void calcR_Re(long double t);
     //расчёт вектора положения ИСЗ в местной горизонтальной плоскости
-    void calcAES_X(const TVector& X);
+    void calcAES_X(const vec& X);
     //расчёт азимута ИСЗ
     long double calcA();
     //расчёт элевации ИСЗ
     long double calcE();
     //проверка на возможность провести измерения
-    bool isMeasurable(const TVector& X, long double t);
+    bool isMeasurable(const vec& X, long double t);
     //собственно измерения
-    void measure(const TVector& X, long double t);
+    void measure(const vec& X, long double t);
     //завершение работы
     void finalize();
 };
