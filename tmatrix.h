@@ -38,13 +38,13 @@ public:
     TVector operator * (const TVector& rval) const;
 
     //обращение матрицы
-    TMatrix operator !() const;
+    TMatrix operator !();
     //транспонирование матрицы
     TMatrix t() const;
 
     static TMatrix E(int n);
 
-    ~TMatrix();
+    //~TMatrix();
 };
 
 #endif // TMATRIX_H

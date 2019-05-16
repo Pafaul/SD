@@ -19,26 +19,35 @@
 #include "custom.h"
 #include "trajectory_processing.h"
 
+TMatrix fix_matrix( const TMatrix& matrix );
 void print_vector(const TVector& vector);
 void writeMatrix( const TMatrix& result, std::string filename);
 void writeVector( const TVector& result, std::string filename);
 long double vector_diff( const TVector& X, const TVector& Y );
 void matrix_copy_result(const TModel& A, TMatrix& B);
 void matrix_copy_measures(const Trajectory_Processing& A, TMatrix& B);
+TMatrix E(int i);
 
 int main()
 {
+    //TMatrix test = E(3000);
+    //test = test*0.0052;
+    //test = !test;
+
     long double eps = 10;
-    long double delta_main_x = -50; long double delta_main_v = -5;
-    long double dispersion = 0.0052;
+    long double delta_main_x = 100; long double delta_main_v = 5;
+    long double dispersion = 1.59989e-5;
+    int mnk_count = 0;
     std::string filename;
     TModel* model = new ArtificialSatellite();
     TIntegrator* Integrator = new TDormandPrinceIntegrator();
 
+    std::cout << "Main model running..." << std::endl;
     Integrator->setPrecision(1E-10);
     Integrator->Run( model );
     model->finalize();
 
+    std::cout << "Getting main measures..." << std::endl;
     Trajectory_Processing* measure_model = new Trajectory_Processing();
     measure_model->process_trajectory(model->Result);
 
@@ -50,24 +59,26 @@ int main()
     writeMatrix(main_measures, filename);
 
     TVector X0 = TVector(6); for (int i = 0; i < 6; i++) X0[i] = model->getInitialConditions()[i];
-    long double der_x = 0.01, der_v = 0.01;
+    long double der_x = 1, der_v = 0.1;
     TVector /*delta_X, delta_Y,*/ X; TVector delta_X;
     /*delta_X.resize(6); delta_Y.resize(6);*/ X.resize(6);
     for (int i = 0; i < 6; i++) { /*delta_X[i] = 0.0; delta_Y[i] = 0.0;*/ X[i] = model->getInitialConditions()[i]; }
     X[0] += delta_main_x;
-    X[1] += delta_main_x;
-    X[2] += delta_main_x;
+    X[1] += 0;
+    X[2] += 0;
     X[3] += delta_main_v;
-    X[4] += delta_main_v;
-    X[5] += delta_main_v;
+    X[4] += 0;
+    X[5] += 0;
     TVector delta_measures = TVector();
     TMatrix H;
     TMatrix derivatives = TMatrix(main_measures.row_count()*2, 6);
     TMatrix der_arr [12];
     TMatrix mnk_measures = TMatrix(main_measures.row_count(), 3);
     TMatrix D;
-    while (vector_diff(X, X0) > eps)
+    std::cout << "Starting MNK..." << std::endl;
+    do
     {
+        std::cout << "Vector diff: " << vector_diff(X, X0) << std::endl;
         for (int i = 0; i < 12; i++)
             der_arr[i] = TMatrix(main_measures.row_count(), main_measures.col_count());
 
@@ -114,21 +125,41 @@ int main()
        mnk_model = ArtificialSatellite( X, false, 0, 0);
        Integrator->Run(&mnk_model);
        measure_model->process_trajectory(mnk_model.getResult(), false, mnk_measures);
+       writeMatrix(mnk_measures, "measures_" + std::to_string(mnk_count) + ".txt"); mnk_count++;
 
        delta_measures.resize(main_measures.row_count()*2);
        for (int i = 0; i < main_measures.row_count(); i++)
            for (int j = 0; j < 2; j++)
                delta_measures[2*i+j] = main_measures[i][j+1] - mnk_measures[i][j+1];
 
-       D = derivatives.E(derivatives.row_count());
-       D = D*dispersion;
-
-       delta_X = derivatives.t()*
-               (!D)*
-               delta_measures;
-       delta_X = (!((derivatives.t()*
-                    (!D))*
-                    derivatives))*delta_X;
+       std::cout << "DeltaX calculation start" << std::endl;
+       D.resize(derivatives.row_count(), derivatives.row_count());
+       for (int i = 0; i < D.row_count(); i++) D[i][i] = 1.0L;
+       //D = (D)*dispersion;
+       TMatrix temp_D = !D, temp_der = derivatives.t();
+       TMatrix temp;
+       //TMatrix temp = derivatives.t()*D.inv();
+       //delta_X = temp*delta_measures;
+       /*delta_X = derivatives.t()*
+               (D.inv())*
+               delta_measures;*/
+       //temp = derivatives.t()*D.inv()*derivatives;
+       //temp = temp.inv();
+       /*delta_X = (((derivatives.t()*
+                    (D.inv()))*
+                    derivatives).inv())*delta_X;*/
+       //delta_X = temp*delta_X;
+       temp = temp_der*temp_D; fix_matrix(temp);
+       temp = temp*derivatives; fix_matrix(temp);
+       temp = !temp; fix_matrix(temp);
+       temp = temp*temp_der; fix_matrix(temp);
+       temp = temp*temp_D; fix_matrix(temp);
+       delta_X = temp*delta_measures;
+       /*delta_X = (((((temp_der*
+                    temp_D)*
+                    derivatives).inv())*temp_der)*
+               temp_D)*
+               delta_measures;*/
 
 
        writeVector(delta_X, "delta_x.txt");
@@ -139,13 +170,22 @@ int main()
        std::cout << "New vector X: " << std::endl; print_vector(X);
        std::cout << "Real vector X: " << std::endl; print_vector(model->getInitialConditions());
 
-    }
+    } while (vector_diff(X, X0) > eps);
 
     delete model;
     delete Integrator;
 	return 0;
 }
 
+TMatrix fix_matrix( const TMatrix& matrix )
+{
+    TMatrix temp (matrix);
+    for ( int i = 0; i < temp.row_count(); i++ )
+        for ( int j = 0; j < temp.col_count(); j++ )
+            if (temp[i][j] != temp[i][j])
+                temp[i][j] = 1E16L;
+    return temp;
+}
 
 void writeMatrix( const TMatrix& result, std::string filename){
 
@@ -182,9 +222,8 @@ void writeVector( const TVector& result, std::string filename){
 
 long double vector_diff( const TVector& X, const TVector& Y )
 {
-    if ( X.size() != Y.size() ) return 0;
     long double diff = 0.0L;
-    for ( int i = 0; i < X.size(); i++ ) diff += std::pow(X[i] - Y[i], 2);
+    for ( int i = 0; i < 6; i++ ) diff += std::pow(X[i] - Y[i], 2);
     diff = std::sqrt(diff);
     return diff;
 }
@@ -211,4 +250,12 @@ void print_vector(const TVector& vector)
     for (int i = 0; i < vector.size(); i++)
         std::cout << vector[i] << " | ";
     std::cout << std::endl;
+}
+
+TMatrix E(int i)
+{
+    TMatrix e = TMatrix(i, i);
+    for (int j = 0; j < i; j++)
+        e[j][j] = 1.0;
+    return e;
 }
