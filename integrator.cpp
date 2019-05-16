@@ -1,10 +1,4 @@
-
-#include <iostream>
-#include <math.h>
 #include "integrator.h"
-#include "model.h"
-#include "tvector.h"
-#include "tmatrix.h"
 
 #define max(a, b) ( ( (a) > (b) ) ? (a) : (b) )
 #define min(a, b) ( ( (a) < (b) ) ? (a) : (b) )
@@ -59,16 +53,16 @@ long double TDormandPrinceIntegrator::Run(TModel* Model)
 				// Это ошибка на шаге интегрирования
 			    e = 0;
 
-    TVector // Это вектор состояния на начало шага
+    vec // Это вектор состояния на начало шага
             X = Model->getInitialConditions(),
             // Это вектор состояния на конец шага (решение 4-го порядка)
-            X1( X.size() ),
+            X1( X.size(), fill::zeros ),
             // Это вектор состояния на конец шага для коррекции величины шага (решение 5-го порядка)
-            X2( X.size() ),
+            X2( X.size(), fill::zeros ),
             // Это вектор для выдачи результата
-            Xout ( X.size() ),
+            Xout ( X.size(), fill::zeros ),
             // Это буфер для вычисления коэффициентов К
-            Y( X.size() );	
+            Y( X.size(), fill::zeros );
 	
 	// Подготовка хранилища результатов в модели для повышения эффективности выделения памяти
 	Model->prepareResult();
@@ -88,8 +82,6 @@ long double TDormandPrinceIntegrator::Run(TModel* Model)
         // Устанавливаем шаг на итерацию
         h = h_new;
 		  // Вычисляем коэффициенты К
-        if (Model->run(X, t))
-        {
             for ( int j = 0; j < 7; j++ )
             {
                 for ( int k = X.size()-1; k >= 0; k-- )
@@ -119,11 +111,11 @@ long double TDormandPrinceIntegrator::Run(TModel* Model)
             // Коррекция шага
             h_new = h / max( 0.1, min( 5., pow(e / Eps, 0.2)/0.9 ) );
            // Если локальная ошибка превышает установленную величину, пытаемся сделать шаг заново
+
+        if (e != e)
+            std::cout << 'broken' << std::endl;
             if ( e > Eps )
                 continue;
-        } else {
-            std::cout << "AES dropped" << std::endl;
-        }
         // Формирование результатов при помощи механизма плотной выдачи
 		while ( (t_out < t + h) && (t_out <= t1) )
         {

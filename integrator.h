@@ -4,6 +4,8 @@
 
 #include "tvector.h"
 #include "tmatrix.h"
+#include <math.h>
+#include "model.h"
 //---------------------------------------------------------------------------
 
 // Опережающие декларации
@@ -32,7 +34,7 @@ class TDormandPrinceIntegrator : public TIntegrator
         // Коэффициенты a,b,c
         static const long double c[7], a[7][6], b1[7], b2[7];
         // Коэффициенты K[i]
-        TVector K[7];
+        vec K[7];
 		// Машинный нуль
 		long double u;
     public:
