@@ -11,6 +11,7 @@ void Trajectory_Processing::process_trajectory(const mat& trajectory, mat& meas)
     vec X; X.resize(6);
     int count = 0;
     time.resize(trajectory.n_rows);
+    meas.resize(trajectory.n_rows, meas_num+1);
     for (int i = 0; i < trajectory.n_rows; i++)
     {
         for (int j = 1; j < 7; j++)
@@ -18,14 +19,14 @@ void Trajectory_Processing::process_trajectory(const mat& trajectory, mat& meas)
         t = trajectory(i,0);
         if (measure_model->measurable(X, t))
         {
-            measure_model->measure(X, t, false);
-            for (int k = 0; k < 3; k++)
+            measure_model->measure(X, t, true);
+            for (int k = 0; k < meas_num+1; k++)
                 meas(count, k) =
                         measure_model->cur_result[k];
             count++;
         }
     }
-    meas.resize(count, 3);
+    meas.resize(count, meas_num+1);
     delete measure_model;
 }
 
@@ -125,14 +126,14 @@ int Trajectory_Processing::detect_fall(const mat &traj)
 void Trajectory_Processing::get_all_measures(const mat& trajectory, mat& measures)
 {
     measure_model = new Measure_Rework();
-    measures.resize(trajectory.n_rows, 2);
+    measures.resize(trajectory.n_rows, meas_num);
     vec X(6);
     double res1, res2;
     for (int i = 0; i < trajectory.n_rows; i++)
     {
         for (int j = 0; j < 6; j++) X[j] = trajectory(i, j+1);
         measure_model->measure(X, trajectory(i, 0), false);
-        for (int k = 1; k < 3; k++)
+        for (int k = 1; k < meas_num+1; k++)
         {
             measures(i, k-1) = measure_model->cur_result[k];
             res1 = measure_model->cur_result[k];
@@ -169,14 +170,35 @@ vec Trajectory_Processing::from_matrix_measures_to_vector(const mat& meas, int d
         if (meas.n_cols != dimension)
         {
             for (int j = 0; j < dimension; j++)
-                temp(i*dimension+j) = meas(i*dimension,j+1);
+                temp((i-start)*dimension+j) = meas(i*dimension,j+1);
         }
         else
         {
             for (int j = 0; j < dimension; j++)
-                temp(i*dimension+j) = meas(i*dimension,j);
+                temp((i-start)*dimension+j) = meas(i*dimension,j);
         }
     }
+
+    return temp;
+}
+
+vec Trajectory_Processing::get_vec_from_main_measures(mat& meas, int start, int finish)
+{
+    vec temp((finish - start + 1)*meas_num);
+    for (int i = start; i < finish+1; i++)
+    {
+        for (int j = 0; j < meas_num; j++)
+            temp[(i-start)*meas_num+j] = meas(i, j+1);
+    }
+    return temp;
+}
+
+vec Trajectory_Processing::get_vec_from_measures_for_mnk(mat& meas)
+{
+    vec temp(meas.n_rows*meas_num);
+    for (int i = 0; i < meas.n_rows; i++)
+        for (int j = 0; j < meas_num; j++)
+            temp[i*meas_num+j] = meas(i, j);
 
     return temp;
 }

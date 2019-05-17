@@ -46,15 +46,13 @@ ArtificialSatellite::ArtificialSatellite() : TModel ()
     X0[6] = 0;
     X0[7] = 0;
 
-    t0 = 0; t1 = 150000; SamplingIncrement = 1;
+    t0 = 0; t1 = 100000; SamplingIncrement = 1;
     //std::cout << "Main created" << std::endl;
 }
 
 ArtificialSatellite::ArtificialSatellite( const vec& X, bool with_eps, int num, long double eps, long double t0, long double t1) : ArtificialSatellite()
 {
     this->t0 = t0; this->t1 = t1;
-    main_trajectory = false; calc_eps = with_eps;
-    eps_num = num;
 
     for (int i = 0; i < 6; i++)
         X0[i] = X[i];
@@ -100,9 +98,9 @@ void ArtificialSatellite::getRight( const vec &X, long double t, vec &Y )
         Y[2] = X[5];
         //км/с^2 = км^3/c^2*км/км^3  - кг^(-1)*(км^2)*(кг/км^3)*км/с*км/с
                                        //кг^(-1)*(м^2)*(кг/м^3)*(м/с)*(м/с)
-        Y[3] = (double) (-mu*X[0]/pow(dist, 3) - (1.0L/m)*CxS*(ro(h, 0)*norm(Va)/2.0L)*Va[0]);
-        Y[4] = (double) (-mu*X[1]/pow(dist, 3) - (1.0L/m)*CxS*(ro(h, 0)*norm(Va)/2.0L)*Va[1]);
-        Y[5] = (double) (-mu*X[2]/pow(dist, 3) - (1.0L/m)*CxS*(ro(h, 0)*norm(Va)/2.0L)*Va[2]);
+        Y[3] = (double) (-mu*X[0]/pow(dist, 3));// - (1.0L/m)*CxS*(ro(h, 0)*norm(Va)/2.0L)*Va[0]);
+        Y[4] = (double) (-mu*X[1]/pow(dist, 3));// - (1.0L/m)*CxS*(ro(h, 0)*norm(Va)/2.0L)*Va[1]);
+        Y[5] = (double) (-mu*X[2]/pow(dist, 3));// - (1.0L/m)*CxS*(ro(h, 0)*norm(Va)/2.0L)*Va[2]);
         Y[6] = X[7];
         Y[7] = 1/pow(T, 2) - 2*ksi/T*X[7] - 1/pow(T, 2)*X[6] + 1/pow(T, 2)*noise;
     } else {
