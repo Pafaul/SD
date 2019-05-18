@@ -37,6 +37,7 @@ public:
     void calcNorth();   //расчёт направления на север
     long double calcA(); //расчёт азимута
     long double calcE(); //расчёт элевации
+    long double calcR(); //расчёт расстояния
     void finalize();
 
     long double length(vec V) { long double res = 0.0; for (int i = 0; i < V.size(); i++) res += pow(V[i],2); return sqrt(res); }

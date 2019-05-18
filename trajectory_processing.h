@@ -13,6 +13,7 @@ protected:
     Measure_Rework* measure_model;
     mat measures, measures_MNK;
     vec time;
+    int meas_num = 2;
     long double Re = 6731*1000.0L;
 public:
     Trajectory_Processing();
@@ -23,6 +24,8 @@ public:
     vec get_new_time_for_models(const mat& measures);
     const mat& get_measures() const { return measures; }
     int detect_fall(const mat& traj);
+    vec get_vec_from_main_measures(mat& meas, int start, int finish);
+    vec get_vec_from_measures_for_mnk(mat& meas);
     vec from_matrix_measures_to_vector(const mat& meas, int dimension);
     vec from_matrix_measures_to_vector(const mat& meas, int dimension, int start, int finish);
 };

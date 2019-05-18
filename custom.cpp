@@ -46,15 +46,13 @@ ArtificialSatellite::ArtificialSatellite() : TModel ()
     X0[6] = 0;
     X0[7] = 0;
 
-    t0 = 0; t1 = 150000; SamplingIncrement = 1;
+    t0 = 0; t1 = 100000; SamplingIncrement = 1;
     //std::cout << "Main created" << std::endl;
 }
 
 ArtificialSatellite::ArtificialSatellite( const vec& X, bool with_eps, int num, long double eps, long double t0, long double t1) : ArtificialSatellite()
 {
     this->t0 = t0; this->t1 = t1;
-    main_trajectory = false; calc_eps = with_eps;
-    eps_num = num;
 
     for (int i = 0; i < 6; i++)
         X0[i] = X[i];

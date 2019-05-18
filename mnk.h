@@ -7,8 +7,10 @@
 class MNK
 {
 protected:
-    long double H_delta_x = 1e-3, H_delta_v = 1e-3;
+    long double H_delta_x = 1, H_delta_v = 1e-1;
     Trajectory_Processing proc_traj;
+    int meas_num = 2;
+    int count = 0;
 
 public:
     MNK();

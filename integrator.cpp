@@ -153,7 +153,7 @@ long double TDormandPrinceIntegrator::Run(TModel* Model)
         // Обновляем X и наращиваем время на величину сделанного шага
         X = X1;
         t += h;
-        Model->do_thing(X, t);
+        //Model->do_thing(X, t);
 //        if (Model->run(X, t) == false) for(int i = 3; i < 6; i++) X[i] = 0.0L;
 
         // Считаем количество итераций для вычисления глобальной погрешности

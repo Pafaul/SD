@@ -29,7 +29,7 @@ mat MNK::get_H(vec& X0, long double t0, long double tk)
     mat H;
 
     TDormandPrinceIntegrator Integrator = TDormandPrinceIntegrator();
-    Integrator.setPrecision(1E-10);
+    Integrator.setPrecision(1E-5);
 
     long double delta = 0;
     for (int i = 0; i < 6; i++)
@@ -45,21 +45,19 @@ mat MNK::get_H(vec& X0, long double t0, long double tk)
         proc_traj.get_all_measures(models[i].getResult(), measures[i]);
     }
 
-    H.resize(measures[0].n_rows*2, 6);
-    long double res = 0.0, res1 = 0.0, res2 = 0.0;
+    H.resize(measures[0].n_rows*meas_num, 6);
     for (int i = 0; i < measures[0].n_rows; i++)
         for (int j = 0; j < 6; j++)
         {
             j < 3 ? delta = H_delta_x : delta = H_delta_v;
-            for (int k = 0; k < 2; k++)
+            for (int k = 0; k < meas_num; k++)
             {
-                res1 = measures[2*j](i,k);
-                res2 = measures[2*j+1](i,k);
-                res = (res1 - res2)/(2*delta);
-                H(2*i+k, j) = res;//(measures[2*j](i, k) - measures[2*j+1](i, k))/(2*delta);
+                H(meas_num*i+k, j) = (measures[2*j](i, k) - measures[2*j+1](i, k))/(2*delta);
             }
         }
-
+    write_matrix(measures[0], "measures_0.txt");
+    write_matrix(H, "h_matrix.txt");
+    //H  *= 1e5;
     return H;
 
 }
