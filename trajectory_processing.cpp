@@ -81,8 +81,10 @@ vec Trajectory_Processing::get_new_time_for_models(const mat &meas)
     bool finish = false;
     vec temp;
     int i = 0;
-    for (i = 0; i < meas.n_rows-1; i++)
+    double temp1 = 0.0, temp2 = 0.0;
+    for (i = 0; i < meas.n_rows-2; i++)
     {
+        temp1 = meas(i, 0); temp2 = meas(i+1,0);
         if (abs(meas(i, 0) - meas(i+1, 0)) == 1)
         {
             if (start == false)
@@ -103,7 +105,7 @@ vec Trajectory_Processing::get_new_time_for_models(const mat &meas)
         }
     }
     if ((finish == false) && (temp.size() != 0))
-        temp[temp.size()-1] = meas(i, 0);
+        temp[temp.size()-1] = i;
     return temp;
 }
 

@@ -73,14 +73,14 @@ int main()
 
     MNK mnk;
 
-    long double deltas[] = {0, 0, 0, 0, 0, 0};//{1e1, -1e1, 1e1, -1e0, 1e0, -1e0};//{0, 0, 0, 0, 0, 0};//{1e3, -1e3, 1e3, -1e2, 1e2, -1e2};
+    long double deltas[] = {1e3, -1e3, 1e3, -1e1, 1e1, -1e1};//{0, 0, 0, 0, 0, 0};//{1e3, -1e3, 1e3, -1e2, 1e2, -1e2};
 
     //начало МНК
     mat H, D, temp, mnk_matrix(1, 6);
     vec Y, fi, delta_x(6, fill::zeros), X(8, fill::zeros);
     ArtificialSatellite mnk_model;
     double start_cond;
-    for (int i = 2; i < 3; i++)
+    for (int i = 0; i < times.size()/2; i++)
     {
         for (int j = 0; j < 6; j++)
         {
@@ -90,7 +90,7 @@ int main()
                 if (j == 3)
                     start_cond = 8e3;
             else start_cond = 0;
-            X[j] = model->getResult()(model->getResult()(times[i], 0), j+1) + deltas[j];
+            X[j] = model->getResult()(main_measures(times[2*i], 0), j+1) + deltas[j];
         }
         //МНК стартует здесь
         do
@@ -110,6 +110,7 @@ int main()
             //получение опорной траектории для последующих измерений
             mnk_model = ArtificialSatellite(X, false, 0, 0, main_measures(times[2*i]), main_measures(times[2*i+1]));
             Integrator->Run(&mnk_model);
+            writeMatrix(mnk_model.getResult(), "mnk_file_model.txt");
 
             //составление матрицы дисперсий измерений
             D = mat(H.n_rows, H.n_rows, fill::eye);
@@ -130,7 +131,8 @@ int main()
             std::cout << "X" << std::endl << X << std::endl << "delta_X norm: " << norm(delta_x) << std::endl;
             std::cout << "DISPERSION matrix" << std::endl << ((H.t()*(D.i())*H)).i() << std::endl;
 
-        } while (norm(delta_x) > 1e-3);
+        } while (norm(delta_x) > 1);
+        std::cin >> delta_main_x;
     }
 
     delete model;
