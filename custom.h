@@ -5,6 +5,7 @@
 #include "measure_rework.h"
 #include <math.h>
 #include <tuple>
+using namespace arma;
 
 //---------------------------------------------------------------------------
 
@@ -26,9 +27,9 @@ protected:
     //atmosphere parameters
     static long double atmosParam[8][4]; long double atmosRoDeviation;
     //Earth rotation Vector, Speed, AeroSpeed, start speed for ellipsoid trajectory, temporary vector
-    TVector EarthRotation, V, Va, Ve, temp;
+    vec EarthRotation, V, Va, Ve, temp;
     //rotation matrix
-    TMatrix A, startRotation;
+    mat A, startRotation;
     //distance to center of Earth, distance to Earth surface
     long double dist = 0.0L, h = 0.0L;
     //генератор случайных чисел
@@ -38,13 +39,15 @@ protected:
     int n = 0;
 public:
     ArtificialSatellite( );
-    ArtificialSatellite( const TVector& X, bool with_eps, int num, long double eps);
+    ArtificialSatellite( const vec& X, bool with_eps, int num, long double eps, long double t0, long double t1);
 
-    void getRight( const TVector& X, long double t, TVector& Y );
+    void getRight( const vec& X, long double t, vec& Y );
     long double ro( long double distance, long double rand );
-    bool run ( const TVector& X, long double t );
-    void do_thing( const TVector& X, long double t);
-//    TMatrix get_measures() { return measure->Result; } ;
-//    TMatrix get_derivative() { return derivative; };
+    bool run ( const vec& X, long double t );
+    void do_thing( const vec& X, long double t);
+//    mat get_measures() { return measure->Result; } ;
+//    mat get_derivative() { return derivative; };
     void finalize();
+
+    long double length(vec V) {long double temp = 0.0; for (int i = 0; i < V.size(); i++) temp += pow(V[i], 2); return temp; }
 };

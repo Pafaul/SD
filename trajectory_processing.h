@@ -11,14 +11,23 @@ class Trajectory_Processing
 {
 protected:
     Measure_Rework* measure_model;
-    TMatrix measures, measures_MNK;
-    TVector time;
+    mat measures, measures_MNK;
+    vec time;
+    int meas_num = 2;
+    long double Re = 6731*1000.0L;
 public:
     Trajectory_Processing();
-    void process_trajectory(const TMatrix& trajectory);
-    void process_trajectory(const TMatrix &trajectory, bool main, TMatrix& der_measures);
-    void process_trajectory(const TMatrix& trajectory, long double delta_x, long double delta_v, TMatrix& derivatives, const TModel* models);
-    const TMatrix& get_measures() const { return measures; }
+    void process_trajectory(const mat& trajectory, mat& meas);
+    void process_trajectory(const mat &trajectory, bool main, mat& der_measures);
+    void process_trajectory(const mat& trajectory, long double delta_x, long double delta_v, mat& derivatives, const TModel* models);
+    void get_all_measures(const mat& trajectory, mat& measures);
+    vec get_new_time_for_models(const mat& measures);
+    const mat& get_measures() const { return measures; }
+    int detect_fall(const mat& traj);
+    vec get_vec_from_main_measures(mat& meas, int start, int finish);
+    vec get_vec_from_measures_for_mnk(mat& meas);
+    vec from_matrix_measures_to_vector(const mat& meas, int dimension);
+    vec from_matrix_measures_to_vector(const mat& meas, int dimension, int start, int finish);
 };
 
 #endif // TRAJECTORY_PROCESSING_H
